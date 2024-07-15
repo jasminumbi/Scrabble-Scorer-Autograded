@@ -39,7 +39,7 @@ function initialPrompt() {
 };
 
 
-let newPointStructure;
+let newPointStructure = transform(oldPointStructure);
 
 let simpleScorer = function(word) {
   word = word.toUpperCase();
@@ -52,7 +52,7 @@ let simpleScorer = function(word) {
 
 let vowelBonusScorer = function(word) {
   word = word.toUpperCase();
-  let vowels = ["a", "e", "i", "o", "u"];
+  let vowels = ["A", "E", "I", "O", "U"];
   let letterPoints = 0;
   for (let i = 0; i < word.length; i++){
     if (vowels.includes(word[i])){
@@ -64,7 +64,15 @@ let vowelBonusScorer = function(word) {
   return letterPoints;
 }
 
-let scrabbleScorer;
+let scrabbleScorer = function(word) {
+  let letterPoints = 0;
+  word = word.toUpperCase();
+  for(let i = 0; i < word.length; i++){
+    let letters = word[i];
+    letterPoints += newPointStructure[letters];
+  }
+  return letterPoints;
+};
 
 const scoringAlgorithms = [
   {name: "Simple Score",
@@ -85,18 +93,15 @@ const scoringAlgorithms = [
  function scorerPrompt() {
   let selectedAlgorithm = input.question("Which scoring algorithm would you like to use?\n\n0 - Simple: One point per character\n1 - Vowel Bonus: Vowels are worth 3 points\n2 - Scrabble: Uses scrabble point system\nEnter 0, 1, or 2:"
    );
-   if(selectedAlgorithm === 0){
-    console.log(`Score for '${word}': ${scoringAlgorithms[0].scoreFunction(word)}`);
-   }
    return selectedAlgorithm;
  }
 
 function transform(object) {
-  newPointStructure = { };
-  for (key in object) {
+  let newPointStructure = {};
+  for (let key in object) {
     keyArray = object[key];
     for(i = 0; i < keyArray.length; i++) {
-      newPointStructure[keyArray[i].toLowerCase()] = Number(key);
+      newPointStructure[keyArray[i].toUpperCase()] = Number(key);
       }
   }        
   return newPointStructure
@@ -105,7 +110,9 @@ function transform(object) {
 
 function runProgram() {
    initialPrompt();
-   scorerPrompt(scoringAlgorithms);
+   let pickedNumber = scorerPrompt(scoringAlgorithms);
+   let score = scoringAlgorithms[pickedNumber].scoreFunction(word);
+   console.log(`Score for '${word}': ${score}`);
    
 }
 
